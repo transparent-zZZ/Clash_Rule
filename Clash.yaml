@@ -46,9 +46,9 @@ external-controller: '127.0.0.1:9090'
 # secret: ""
 
 # 实验性功能
-experimental:
-  ignore-resolve-fail: true # 忽略 DNS 解析失败，默认值为 true
-  # interface-name: en0 # outbound interface name
+#experimental:
+#  ignore-resolve-fail: true # 忽略 DNS 解析失败，默认值为 true
+#  interface-name: en0 # outbound interface name
 
 # 本地 SOCKS5 / HTTP(S) 服务认证
 # authentication:
@@ -62,58 +62,66 @@ experimental:
 #   '*.clash.dev': 127.0.0.1
 #   'alpha.clash.dev': '::1'
 
-dns:
-  enable: true # 是否启用dns false
-  ipv6: false
-  listen: 0.0.0.0:53
-  enhanced-mode: fake-ip # 模式：redir-host或fake-ip
-  fake-ip-range: 198.18.0.1/16 #
-  fake-ip-filter: # fake ip 白名单列表，如果你不知道这个参数的作用，请勿修改
-     - '*.lan'
-     - localhost.ptlogin2.qq.com
-     - '+.srv.nintendo.net'
-     - '+.stun.playstation.net'
-     - '+.msftconnecttest.com'
-     - '+.msftncsi.com'
-     - '+.xboxlive.com'
-     - 'msftconnecttest.com'
-     - 'xbox.*.microsoft.com'
-     - '*.battlenet.com.cn'
-     - '*.battlenet.com'
-     - '*.blzstatic.cn'
-     - '*.battle.net'
-  nameserver:
-     - 223.5.5.5 # 阿里DNS
-    #  - 180.76.76.76 # 百度DNS
-     - 119.29.29.29 # 腾讯DNS
-     - 117.50.11.11 # ONE DNS拦截版 恶意网站拦截、广告过滤
-     - 117.50.10.10 # ONE DNS纯净版 直接返回其真实的响应结果
-     - 114.114.114.114 # 114DNS
-     - https://dns.alidns.com/dns-query # 阿里 DoH DNS
-     - https://doh.360.cn/dns-query # 360 DoH DNS
-  fallback:
-     - 8.8.8.8 # 谷歌DNS
-     - 1.1.1.1 # Cloudflare DNS
-     - tls://dns.rubyfish.cn:853
-     - tls://1.0.0.1:853
-     - tls://dns.google:853
-     - https://dns.rubyfish.cn/dns-query
-     - https://cloudflare-dns.com/dns-query
-     - https://dns.google/dns-query
-  fallback-filter:
-     geoip: true # 默认
-     ipcidr: # 在这个网段内的 IP 地址会被考虑为被污染的 IP
-       - 240.0.0.0/4
+#dns:
+#  enable: false # 是否启用dns false
+#  ipv6: true
+#  listen: 0.0.0.0:53
+#  enhanced-mode: fake-ip # 模式：redir-host或fake-ip
+#  fake-ip-range: 198.18.0.1/16 #
+#  fake-ip-filter: # fake ip 白名单列表，如果你不知道这个参数的作用，请勿修改
+#     - '*.lan'
+#     - localhost.ptlogin2.qq.com
+#  nameserver:
+#     - 223.5.5.5 # 阿里DNS
+#     - 119.29.29.29 # 腾讯DNS
+#	  - 8.8.8.8 # default value
+#      - tls://dns.rubyfish.cn:853 # DNS over TLS
+#      - https://1.1.1.1/dns-query # DNS over HTTPS
+#      - dhcp://en0 # dns from dhcp
+      # - '8.8.8.8#en0'
+#     - 117.50.11.11 # ONE DNS拦截版 恶意网站拦截、广告过滤
+#     - 117.50.10.10 # ONE DNS纯净版 直接返回其真实的响应结果
+#     - 114.114.114.114 # 114DNS
+#     - https://dns.alidns.com/dns-query # 阿里 DoH DNS
+#  fallback:
+#     - 8.8.8.8 # 谷歌DNS
+#     - 1.1.1.1 # Cloudflare DNS
+#     - 'tcp://1.1.1.1#en0'
+#     - tls://dns.rubyfish.cn:853
+#     - tls://1.0.0.1:853
+#     - tls://dns.google:853
+#     - https://dns.rubyfish.cn/dns-query
+#     - https://cloudflare-dns.com/dns-query
+#     - https://dns.google/dns-query
+#	  fallback-filter:
+#   	  geoip: true
+#   	  geoip-code: CN
+#     	  ipcidr:
+#       	  - 240.0.0.0/4
+#     	  domain:
+#       	  - '+.google.com'
+#       	  - '+.facebook.com'
+#       	  - '+.youtube.com'
+
+  # Lookup domains via specific nameservers
+  # nameserver-policy:
+  #   'www.baidu.com': '114.114.114.114'
+  #   '+.internal.crop.com': '10.0.0.1'
+
+interface-name: en0 # conflict with `tun.auto-detect-interface`
 
 tun:
   enable: true
   stack: system # or gvisor
-  dns-hijack:
-    - 198.18.0.2:53
-    # - 8.8.8.8:53
-    # - tcp://8.8.8.8:53
-  auto-route: true # auto set global route
-  auto-detect-interface: true # conflict with interface-name
+#  dns-hijack:
+#    - 198.18.0.2:53
+#    - 8.8.8.8:53
+#    - tcp://8.8.8.8:53
+#    - any:53
+#    - tcp://any:53
+  auto-route: true # manage `ip route` and `ip rules`
+  auto-redir: true # manage nftable REDIRECT
+  auto-detect-interface: true # conflict with `interface-name`
 
 # 1. clash DNS 请求逻辑：
 #   (1) 当访问一个域名时， nameserver 与 fallback 列表内的所有服务器并发请求，得到域名对应的 IP 地址。
@@ -280,6 +288,7 @@ cfw-bypass:
   - "*.pdfwifi.com"
   - "*.zhenguanyu.biz"
   - "*.zhenguanyu.com"
+  - "*.snapdrop.net"
   # CN域名直连(中国|公司|网络)
   - "*.cn"
   - "*.xn--fiqs8s"
@@ -384,10 +393,6 @@ cfw-bypass:
   - "*.hdslb.com"
   - "*.im9.com"
   - "*.smtcdns.net"
-  # Blizzard
-  - "*.battle.net"
-  - "*.battlenet.com"
-  - "*.blizzard.com"
   # ByteDance
   - "*.amemv.com"
   - "*.bdxiguaimg.com"
@@ -637,131 +642,6 @@ cfw-bypass:
   - "*.zmzapi.com"
   - "*.zmzapi.net"
   - "*.zmzfile.com"
-  # Private Tracker
-  - "*announce*"
-  - "*torrent*"
-  - "*tracker*"
-  - "*announce*"
-  - "*torrent*"
-  - "*tracker*"
-  - "*.52pt.site"
-  - "*.aidoru-online.me"
-  - "*.alpharatio.cc"
-  - "*.animebytes.tv"
-  - "*.animetorrents.me"
-  - "*.anthelion.me"
-  - "*.asiancinema.me"
-  - "*.audiences.me"
-  - "*.avgv.cc"
-  - "*.avistaz.to"
-  - "*.awesome-hd.me"
-  - "*.beitai.pt"
-  - "*.beyond-hd.me"
-  - "*.bibliotik.me"
-  - "*.bittorrent.com"
-  - "*.blutopia.xyz"
-  - "*.broadcasthe.net"
-  - "*.bt.byr.cn"
-  - "*.bt.neu6.edu.cn"
-  - "*.btschool.club"
-  - "*.bwtorrents.tv"
-  - "*.byr.pt"
-  - "*.ccfbits.org"
-  - "*.cgpeers.com"
-  - "*.chdbits.co"
-  - "*.cinemageddon.net"
-  - "*.cinematik.net"
-  - "*.cinemaz.to"
-  - "*.classix-unlimited.co.uk"
-  - "*.concertos.live"
-  - "*.dicmusic.club"
-  - "*.discfan.net"
-  - "*.dxdhd.com"
-  - "*.eastgame.org"
-  - "*.empornium.me"
-  - "*.et8.org"
-  - "*.exoticaz.to"
-  - "*.extremlymtorrents.ws"
-  - "*.filelist.io"
-  - "*.gainbound.net"
-  - "*.gazellegames.net"
-  - "*.gfxpeers.net"
-  - "*.hd-space.org"
-  - "*.hd-torrents.org"
-  - "*.hd4.xyz"
-  - "*.hd4fans.org"
-  - "*.hdarea.co"
-  - "*.hdatmos.club"
-  - "*.hdbd.us"
-  - "*.hdbits.org"
-  - "*.hdchina.org"
-  - "*.hdcity.city"
-  - "*.hddolby.com"
-  - "*.hdfans.org"
-  - "*.hdhome.org"
-  - "*.hdpost.top"
-  - "*.hdroute.org"
-  - "*.hdsky.me"
-  - "*.hdstreet.club"
-  - "*.hdtime.org"
-  - "*.hdupt.com"
-  - "*.hdzone.me"
-  - "*.hhanclub.top"
-  - "*.hitpt.com"
-  - "*.hitpt.org"
-  - "*.hudbt.hust.edu.cn"
-  - "*.icetorrent.org"
-  - "*.iptorrents.com"
-  - "*.j99.info"
-  - "*.joyhd.net"
-  - "*.jpopsuki.eu"
-  - "*.karagarga.in"
-  - "*.keepfrds.com"
-  - "*.landof.tv"
-  - "*.leaguehd.com"
-  - "*.lemonhd.org"
-  - "*.lztr.me"
-  - "*.m-team.cc"
-  - "*.madsrevolution.net"
-  - "*.moecat.best"
-  - "*.morethan.tv"
-  - "*.msg.vg"
-  - "*.myanonamouse.net"
-  - "*.nanyangpt.com"
-  - "*.ncore.cc"
-  - "*.nebulance.io"
-  - "*.nicept.net"
-  - "*.npupt.com"
-  - "*.nwsuaf6.edu.cn"
-  - "*.open.cd"
-  - "*.oppaiti.me"
-  - "*.orpheus.network"
-  - "*.ourbits.club"
-  - "*.passthepopcorn.me"
-  - "*.pornbits.net"
-  - "*.privatehd.to"
-  - "*.pterclub.com"
-  - "*.pthome.net"
-  - "*.ptsbao.club"
-  - "*.pttime.org"
-  - "*.pussytorrents.org"
-  - "*.redacted.ch"
-  - "*.sdbits.org"
-  - "*.sharkpt.net"
-  - "*.sjtu.edu.cn"
-  - "*.skyey2.com"
-  - "*.soulvoice.club"
-  - "*.springsunday.net"
-  - "*.tju.pt"
-  - "*.tjupt.org"
-  - "*.torrentday.com"
-  - "*.torrentleech.org"
-  - "*.torrentseeds.org"
-  - "*.totheglory.im"
-  - "*.trontv.com"
-  - "*.u2.dmhy.org"
-  - "*.uhdbits.org"
-  - "*.xauat6.edu.cn"
   # TeamViewer
   - "*.teamviewer.com"
   # Public Direct CDN 公共直连
@@ -770,6 +650,10 @@ cfw-bypass:
   - "*.jiasule.com"
   - "*.staticfile.org"
   - "*.upaiyun.com"
+  # China DNS
+  - "*.doh.pub"
+  - "*.dns.alidns.com"
+  - "*.doh.360.cn"
   # AccelerateDirectSites
   - "*.10010.com"
   - "*.115.com"
@@ -835,6 +719,7 @@ cfw-bypass:
   - "*.eastday.com"
   - "*.eastmoney.com"
   - "*.ecitic.com"
+  - "*.element-plus.org"
   - "*.ewqcxz.com"
   - "*.fang.com"
   - "*.fantasy.tv"
